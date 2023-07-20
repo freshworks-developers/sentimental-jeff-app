@@ -103,7 +103,6 @@ function sentiment(score) {
  * @param {string} sentiment - Sentiment of this ticket
  */
 async function updateTicketField(ticket, sentiment) {
-  console.log("update ticket field called")
   try {
     const iparams = await client.iparams.get("sentimentField");
     if (iparams.sentimentField && iparams.sentimentField !== '') {
@@ -183,7 +182,6 @@ function calculateSentimentFromData(data) {
 async function calculateAndUpdateSentiment() {
   try {
     const ticketDetail = await client.data.get("ticket");
-    console.log(ticketDetail.ticket)
     try {
       let ticketDetailsResponse = await client.request.invokeTemplate("getTicketDetails", {
         context: {
