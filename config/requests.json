@@ -1,0 +1,36 @@
+{
+  "getTicketDetails": {
+    "schema": {
+      "method": "GET",
+      "protocol": "https",
+      "host": "<%= iparam.domainName %>.freshdesk.com",
+      "path": "/api/v2/tickets/<%= context.ticketId %>?include=conversations",
+      "headers": {
+        "Authorization": "Basic <%= encode(iparam.apiKey) %>"
+      }
+    }
+  },
+  "updateTicket": {
+    "schema": {
+      "method": "PUT",
+      "protocol": "https",
+      "host": "<%= iparam.domainName %>.freshdesk.com",
+      "path": "/api/v2/tickets/<%= context.ticketId %>",
+      "headers": {
+        "Authorization": "Basic <%= encode(iparam.apiKey) %>",
+        "Content-Type": "application/json"
+      }
+    }
+  },
+  "getTicketFields": {
+    "schema": {
+      "method": "GET",
+      "protocol": "https",
+      "host": "<%= iparam.domainName %>.freshdesk.com",
+      "path": "/api/v2/ticket_fields",
+      "headers": {
+        "Authorization": "Basic <%= context.encodedApiKey %>"
+      }
+    }
+  }
+}

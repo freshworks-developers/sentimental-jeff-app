@@ -1,5 +1,5 @@
 {
-  "platform-version": "2.0",
+  "platform-version": "2.3",
   "product": {
     "freshdesk": {
       "location": {
@@ -7,10 +7,16 @@
           "url": "template.html",
           "icon": "icon.svg"
         }
+      },
+      "requests": {
+        "getTicketDetails": {},
+        "updateTicket": {},
+        "getTicketFields": {}
       }
     }
   },
-  "whitelisted-domains": [
-    "https://*.freshdesk.com"
-  ]
+  "engines": {
+    "node": "18.14.2",
+    "fdk": "9.0.2"
+  }
 }

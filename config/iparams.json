@@ -7,9 +7,11 @@
       "product": "freshdesk"
     },
     "required": true,
-    "events": [{
-      "change": "fillTicketFieldsOptions"
-    }]
+    "events": [
+      {
+        "change": "fillTicketFieldsOptions"
+      }
+    ]
   },
   "apiKey": {
     "display_name": "API Key",
@@ -20,9 +22,11 @@
     "type_attributes": {
       "product": "freshdesk"
     },
-    "events": [{
-      "change": "fillTicketFieldsOptions"
-    }]
+    "events": [
+      {
+        "change": "fillTicketFieldsOptions"
+      }
+    ]
   },
   "sentimentField": {
     "display_name": "Custom field to update sentiment",
