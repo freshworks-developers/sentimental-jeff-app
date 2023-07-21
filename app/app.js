@@ -99,43 +99,43 @@ function sentiment(score) {
 /**
  * It checks for the configured custom field to update the sentiment result and update the field with the sentiment result string.
  *
- * @param {string} domain - Domain of the Freshdesk instance
  * @param {object} ticket - Current ticket details
  * @param {string} sentiment - Sentiment of this ticket
  */
-function updateTicketField(domain, ticket, sentiment) {
-  client.iparams.get("sentimentField").then(iparams => {
+async function updateTicketField(ticket, sentiment) {
+  try {
+    const iparams = await client.iparams.get("sentimentField");
     if (iparams.sentimentField && iparams.sentimentField !== '') {
       if (ticket.custom_fields[iparams.sentimentField] !== sentiment) {
-        const url = `https://${domain}/api/v2/tickets/${ticket['id']}`;
-        const options = {
-          headers: {
-            "Authorization": "Basic <%= encode(iparam.apiKey) %>",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            priority: ticket.priority,
-            status: ticket.status,
-            custom_fields: {
-              [iparams.sentimentField]: sentiment
-            }
-          })
+        const body = {
+          priority: ticket.priority,
+          status: ticket.status,
+          custom_fields: {
+            [iparams.sentimentField]: sentiment
+          }
         };
-        client.request.put(url, options).then(() => {
+
+        try {
+          await client.request.invokeTemplate("updateTicket", {
+            context: {
+              ticketId: ticket.id
+            },
+            body: JSON.stringify(body)
+          });
           console.info('Success: Updated the ticket field with the sentiment analysis result');
-        }, error => {
+        } catch (error) {
           console.error('Error: Unable to update the ticket field with the sentiment analysis result');
           console.error(error);
-          notifyError('Failed to update sentiment result to the configured ticket field.')
-        });
+          notifyError('Failed to update sentiment result to the configured ticket field.');
+        }
+      } else {
+        console.info('Skipped updating sentiment to a ticket custom field as not opted for it.');
       }
-    } else {
-      console.info('Skipped updating sentiment to a ticket custom field as not opted for it.');
     }
-  }, error => {
+  } catch (error) {
     console.error('Error: Failed to get the configured ticket field to update sentiment');
     console.error(error);
-  });
+  }
 }
 
 /**
@@ -179,32 +179,27 @@ function calculateSentimentFromData(data) {
 /**
  * This method fetches ticket details and calculates sentiment for it. Then updates it to a ticket field if opted.
  */
-function calculateAndUpdateSentiment() {
-  client.data.get("ticket").then((ticketDetail) => {
-    client.data.get("domainName").then((domainDetail) => {
-      const dataUrl = `https://${domainDetail.domainName}/api/v2/tickets/${ticketDetail.ticket.id}?include=conversations`;
-      const options = {
-        headers: {
-          "Authorization": "Basic <%= encode(iparam.apiKey) %>"
+async function calculateAndUpdateSentiment() {
+  try {
+    const ticketDetail = await client.data.get("ticket");
+    try {
+      let ticketDetailsResponse = await client.request.invokeTemplate("getTicketDetails", {
+        context: {
+          ticketId: ticketDetail.ticket.id
         }
-      };
-      client.request.get(dataUrl, options)
-        .then(data => {
-          const sentimentText = calculateSentimentFromData(JSON.parse(data.response));
-          updateTicketField(domainDetail.domainName, ticketDetail.ticket, sentimentText);
-        }, error => {
-          console.error('Error fetching the ticket details');
-          console.error(error);
-          notifyError('Failed to get ticket details.');
-        });
-    }, error => {
-      console.error('Error: Failed to get the domain.');
-      console.error(error)
-    });
-  }, error => {
+      });
+      let responseJSON = JSON.parse(ticketDetailsResponse.response);
+      const sentimentText = calculateSentimentFromData(responseJSON);
+      await updateTicketField(ticketDetail.ticket, sentimentText);
+    } catch (error) {
+      console.error('Error fetching the ticket details');
+      console.error(error);
+      notifyError('Failed to get ticket details.');
+    }
+  } catch (error) {
     console.error('Error: Failed to get ticket details with Data method.');
     console.error(error)
-  });
+  }
 }
 
 document.addEventListener("DOMContentLoaded", function () {
